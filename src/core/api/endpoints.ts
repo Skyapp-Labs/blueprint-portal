@@ -1,6 +1,7 @@
 export const ENDPOINTS = {
   // Auth
   AUTH: {
+    CONFIG: '/auth/config',
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
@@ -10,6 +11,9 @@ export const ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     ME: '/users/me',
+    SEND_OTP: '/auth/send-otp',
+    VERIFY_OTP: '/auth/verify-otp',
+    RESEND_OTP: '/auth/resend-otp',
   },
   // Users
   USERS: {

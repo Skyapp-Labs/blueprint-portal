@@ -16,15 +16,57 @@ function groupSettings(settings: Setting[]): Record<string, Setting[]> {
   }, {});
 }
 
+// Render a value in read-only mode: arrays as individual code tags, booleans as badge
+function SettingValue({ setting }: { setting: Setting }) {
+  if (setting.type === 'boolean') {
+    const isTrue = setting.value === 'true' || setting.value === '1';
+    return (
+      <Badge variant={isTrue ? 'success' : 'secondary'} className="text-[10px]">
+        {isTrue ? 'true' : 'false'}
+      </Badge>
+    );
+  }
+
+  const trimmed = setting.value?.trim() ?? '';
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    const inner = trimmed.slice(1, -1).trim();
+    if (inner) {
+      const items = inner.split(/},\s*\{/);
+      return (
+        <div className="flex flex-wrap gap-1">
+          {items.map((item, i) => {
+            let chunk = item.trim();
+            if (!chunk.startsWith('{')) chunk = '{' + chunk;
+            if (!chunk.endsWith('}')) chunk = chunk + '}';
+            return (
+              <code key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
+                {chunk}
+              </code>
+            );
+          })}
+        </div>
+      );
+    }
+    return <code className="text-xs bg-muted px-2 py-0.5 rounded">[]</code>;
+  }
+
+  return (
+    <code className="text-xs bg-muted px-2 py-0.5 rounded">
+      {setting.value || '—'}
+    </code>
+  );
+}
+
 function SettingRow({ setting }: { setting: Setting }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(setting.value);
   const update = useUpdateSetting();
   const { toast } = useToast();
 
-  async function save() {
+  async function save(overrideVal?: string) {
+    const saveVal = overrideVal ?? val;
     try {
-      await update.mutateAsync({ key: setting.key, value: val });
+      await update.mutateAsync({ key: setting.key, value: saveVal });
       toast({ title: 'Setting updated', variant: 'success' });
       setEditing(false);
     } catch (err) {
@@ -35,6 +77,40 @@ function SettingRow({ setting }: { setting: Setting }) {
   function cancel() {
     setVal(setting.value);
     setEditing(false);
+  }
+
+  // Boolean: render inline toggle, no separate edit mode needed
+  if (setting.type === 'boolean' && setting.isEditable) {
+    const isTrue = setting.value === 'true' || setting.value === '1';
+    return (
+      <tr className="border-b border-border hover:bg-muted/30 transition-colors">
+        <td className="px-4 py-3 w-72">
+          <p className="text-sm font-mono text-foreground">{setting.key}</p>
+          {setting.description && (
+            <p className="text-xs text-muted-foreground mt-0.5">{setting.description}</p>
+          )}
+        </td>
+        <td className="px-4 py-3">
+          <Badge variant="secondary" className="text-[10px]">{setting.type}</Badge>
+        </td>
+        <td className="px-4 py-3 w-full">
+          <SettingValue setting={setting} />
+        </td>
+        <td className="px-4 py-3 text-right">
+          <button
+            role="switch"
+            aria-checked={isTrue}
+            disabled={update.isPending}
+            onClick={() => save(isTrue ? 'false' : 'true')}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50 ${isTrue ? 'bg-primary' : 'bg-input'}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-lg transition-transform ${isTrue ? 'translate-x-4' : 'translate-x-0'}`}
+            />
+          </button>
+        </td>
+      </tr>
+    );
   }
 
   return (
@@ -59,7 +135,7 @@ function SettingRow({ setting }: { setting: Setting }) {
               className="max-w-xs h-7 text-xs"
               autoFocus
             />
-            <Button size="icon" variant="ghost" className="h-7 w-7" loading={update.isPending} onClick={save}>
+            <Button size="icon" variant="ghost" className="h-7 w-7" loading={update.isPending} onClick={() => save()}>
               <Check className="h-3.5 w-3.5 text-emerald-600" />
             </Button>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancel}>
@@ -67,23 +143,8 @@ function SettingRow({ setting }: { setting: Setting }) {
             </Button>
           </div>
         ) : (
-        (() => {
-          let parsed: unknown = null;
-          try { parsed = JSON.parse(setting.value); } catch { /* not JSON */ }
-          if (Array.isArray(parsed)) {
-            return (
-              <div className="flex flex-wrap gap-1">
-                {parsed.map((item, i) => (
-                  <code key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
-                    {String(item)}
-                  </code>
-                ))}
-              </div>
-            );
-          }
-          return <code className="text-xs bg-muted px-2 py-0.5 rounded">{setting.value || '—'}</code>;
-        })()
-      )}
+          <SettingValue setting={setting} />
+        )}
       </td>
       <td className="px-4 py-3 text-right">
         {setting.isEditable ? (
@@ -110,8 +171,21 @@ export function SettingsTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 rounded-full border-4 border-primary border-t-transparent" />
+      <div className="space-y-6">
+        {[0, 1].map((i) => (
+          <div key={i} className="space-y-2">
+            <div className="h-4 w-24 rounded bg-muted animate-pulse" />
+            <div className="rounded-lg border border-border overflow-hidden">
+              {[0, 1, 2, 3].map((j) => (
+                <div key={j} className="px-4 py-3 border-b border-border flex gap-4">
+                  <div className="h-4 w-48 rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
