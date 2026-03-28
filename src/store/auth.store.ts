@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type StorageValue } from 'zustand/middleware';
 
 export interface AdminUser {
   id: string;
@@ -21,6 +21,36 @@ interface AuthState {
   setUser: (user: AdminUser) => void;
   logout: () => void;
 }
+
+type PersistedAuth = Pick<AuthState, 'accessToken' | 'refreshToken' | 'expiresAt' | 'user' | 'isAuthenticated'>;
+
+// Cookie-based storage so the proxy can read auth state server-side.
+// Zustand persist wraps values as { state: T, version?: number } which
+// matches exactly what proxy.ts parses via parsed.state.isAuthenticated.
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+const cookieStorage = {
+  getItem: (name: string): StorageValue<PersistedAuth> | null => {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie
+      .split('; ')
+      .find((c) => c.startsWith(`${name}=`));
+    if (!match) return null;
+    try {
+      return JSON.parse(decodeURIComponent(match.split('=').slice(1).join('=')));
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: StorageValue<PersistedAuth>) => {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Strict`;
+  },
+  removeItem: (name: string) => {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${name}=; path=/; max-age=0`;
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -52,6 +82,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'admin-auth',
+      storage: cookieStorage,
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,

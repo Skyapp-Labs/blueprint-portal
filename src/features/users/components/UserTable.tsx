@@ -25,6 +25,13 @@ import {
   RefreshCw,
   XCircle,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/shared/components/dropdown-menu';
 
 const statusVariant: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
   active: 'success',
@@ -39,7 +46,6 @@ interface UserTableProps {
 
 export function UserTable({ onSelect }: UserTableProps) {
   const [page, setPage] = useState(1);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const { data, isLoading, isError, refetch } = useUsers(page, 20);
   const deactivate = useDeactivateUser();
   const activate = useActivateUser();
@@ -53,7 +59,6 @@ export function UserTable({ onSelect }: UserTableProps) {
   const totalPages = Math.ceil(total / 20);
 
   async function handleAction(action: string, user: User) {
-    setOpenMenu(null);
     try {
       if (action === 'deactivate') {
         await deactivate.mutateAsync(user.id);
@@ -185,62 +190,45 @@ export function UserTable({ onSelect }: UserTableProps) {
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="relative inline-block">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setOpenMenu(openMenu === user.id ? null : user.id)}
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                      {openMenu === user.id && (
-                        <div className="absolute right-0 mt-1 w-44 rounded-md border border-border bg-background shadow-lg z-10">
-                          <button
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors"
-                            onClick={() => onSelect?.(user)}
-                          >
-                            View details
-                          </button>
-                          {user.status === 'active' ? (
-                            <button
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors text-amber-600"
-                              onClick={() => handleAction('deactivate', user)}
-                            >
-                              <UserX className="h-3.5 w-3.5" /> Deactivate
-                            </button>
-                          ) : user.status === 'suspended' ? (
-                            <button
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors text-emerald-600"
-                              onClick={() => handleAction('activate', user)}
-                            >
-                              <UserCheck className="h-3.5 w-3.5" /> Activate
-                            </button>
-                          ) : null}
-                          {user.status === 'invited' && (
-                            <>
-                              <button
-                                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors"
-                                onClick={() => handleAction('resend-invite', user)}
-                              >
-                                <RefreshCw className="h-3.5 w-3.5" /> Resend invite
-                              </button>
-                              <button
-                                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors text-amber-600"
-                                onClick={() => handleAction('revoke-invite', user)}
-                              >
-                                <XCircle className="h-3.5 w-3.5" /> Revoke invite
-                              </button>
-                            </>
-                          )}
-                          <button
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors text-red-600"
-                            onClick={() => handleAction('delete', user)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onSelect?.(user)}>
+                          View details
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {user.status === 'active' ? (
+                          <DropdownMenuItem onClick={() => handleAction('deactivate', user)}>
+                            <UserX className="h-3.5 w-3.5 text-amber-600" />
+                            <span className="text-amber-600">Deactivate</span>
+                          </DropdownMenuItem>
+                        ) : user.status === 'suspended' ? (
+                          <DropdownMenuItem onClick={() => handleAction('activate', user)}>
+                            <UserCheck className="h-3.5 w-3.5 text-emerald-600" />
+                            <span className="text-emerald-600">Activate</span>
+                          </DropdownMenuItem>
+                        ) : null}
+                        {user.status === 'invited' && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleAction('resend-invite', user)}>
+                              <RefreshCw className="h-3.5 w-3.5" /> Resend invite
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAction('revoke-invite', user)}>
+                              <XCircle className="h-3.5 w-3.5 text-amber-600" />
+                              <span className="text-amber-600">Revoke invite</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem destructive onClick={() => handleAction('delete', user)}>
+                          <Trash2 className="h-3.5 w-3.5" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))

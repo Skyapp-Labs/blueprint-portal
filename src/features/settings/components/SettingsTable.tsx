@@ -67,8 +67,23 @@ function SettingRow({ setting }: { setting: Setting }) {
             </Button>
           </div>
         ) : (
-          <code className="text-xs bg-muted px-2 py-0.5 rounded">{setting.value || '—'}</code>
-        )}
+        (() => {
+          let parsed: unknown = null;
+          try { parsed = JSON.parse(setting.value); } catch { /* not JSON */ }
+          if (Array.isArray(parsed)) {
+            return (
+              <div className="flex flex-wrap gap-1">
+                {parsed.map((item, i) => (
+                  <code key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
+                    {String(item)}
+                  </code>
+                ))}
+              </div>
+            );
+          }
+          return <code className="text-xs bg-muted px-2 py-0.5 rounded">{setting.value || '—'}</code>;
+        })()
+      )}
       </td>
       <td className="px-4 py-3 text-right">
         {setting.isEditable ? (

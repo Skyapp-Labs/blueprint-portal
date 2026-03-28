@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/ui.store';
@@ -20,6 +21,7 @@ import { APP_CONFIG } from '@/config/app.config';
 
 const navItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/roles', label: 'Roles & Permissions', icon: ShieldCheck },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
   { href: '/admin/logs', label: 'Logs', icon: Activity },
   { href: '/admin/replay', label: 'Replay', icon: Rewind },

@@ -26,4 +26,20 @@ export const ENDPOINTS = {
     BASE: '/settings',
     BY_KEY: (key: string) => `/settings/${key}`,
   },
+  // Roles
+  ROLES: {
+    BASE: '/roles',
+    BY_ID: (id: string) => `/roles/${id}`,
+    PERMISSIONS: (id: string) => `/roles/${id}/permissions`,
+  },
+  // Permissions
+  PERMISSIONS: {
+    BASE: '/permissions',
+    BY_ID: (id: string) => `/permissions/${id}`,
+  },
+  // Modules
+  MODULES: {
+    BASE: '/modules',
+    BY_ID: (id: string) => `/modules/${id}`,
+  },
 } as const;
