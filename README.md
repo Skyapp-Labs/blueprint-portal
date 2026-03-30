@@ -1,244 +1,144 @@
-# Admin Portal – API Blueprint System
+# `portal/src/core/` — Read-Only Submodule
 
-## Overview
-
-This is a production-grade Admin Portal built to manage and monitor the API Blueprint system.
-
-The portal is designed for:
-
-* Internal use (admin, support, operators)
-* High performance and low latency
-* Scalability and modular architecture
-* Clean separation from backend services
-
-The system follows a feature-based architecture inspired by Flutter modular design.
+> **Golden rule: never edit any file inside this directory.**
+>
+> `src/core/` is a Git submodule tracked at `https://github.com/Skyapp-Labs/blueprint-portal.git` (branch `core`). Any edit you make here will be lost the next time the submodule is updated, and will create merge conflicts.
+>
+> To change behaviour, use the **override patterns** documented in `src/features/README.md`.
 
 ---
 
-## Tech Stack
+## What lives here
 
-* Framework: Next.js (App Router)
-* UI: shadcn/ui + Tailwind CSS
-* Data Fetching: TanStack Query
-* State Management: Zustand (minimal usage)
-* Language: TypeScript
-
----
-
-## Architecture Principles
-
-1. Feature-based structure (NOT file-type based)
-2. Separation of concerns (API / UI / Logic)
-3. Minimal global state
-4. API-first design (no direct DB access)
-5. Scalable and maintainable modules
-
----
-
-## Project Structure
-
-src/
-app/                → Routing layer (Next.js pages)
-core/               → Shared business logic
-features/           → Feature modules
-shared/             → Reusable UI components
-lib/                → Low-level utilities
-hooks/              → Global hooks
-types/              → Global TypeScript types
-config/             → App configuration
-
----
-
-## Core Layer
-
+```
 core/
-api/
-apiClient.ts      → HTTP client (fetch wrapper)
-endpoints.ts      → Centralized API routes
-
-auth/
-authService.ts    → Login / logout / session handling
-rbac.ts           → Role-based access control
-
-utils/
-errors/
-
----
-
-## Feature Structure
-
-Each feature follows this structure:
-
-features/{feature-name}/
-api/                → API calls (no UI logic)
-hooks/              → Business logic (data + state)
-components/         → UI components
-types/              → Feature-specific types
-
-Example:
-
-features/users/
-api/getUsers.ts
-hooks/useUsers.ts
-components/UserTable.tsx
-types/user.type.ts
+├── api/
+│   ├── apiClient.ts       Centralised fetch wrapper with JWT attach + refresh logic
+│   └── endpoints.ts       All backend API endpoint constants
+├── auth/
+│   ├── authService.ts     login(), sendOtp(), verifyOtp(), logout(), getConfig()
+│   └── rbac.ts            can(user, permission) helper + ROLES constants
+├── errors/
+│   └── api-error.ts       ApiError class (wraps HTTP errors with status + payload)
+├── features/
+│   ├── users/             User list, detail panel, invite dialog, useUsers hook
+│   ├── roles/             Role table, detail panel, create dialog, useRoles hook
+│   └── settings/          Settings table, useSettings hook
+├── shared/
+│   └── components/        badge, button, card, confirm-dialog, dialog,
+│                          dropdown-menu, input, sidebar, toast, top-bar
+├── store/
+│   ├── auth.store.ts      Zustand auth store (persisted to admin-auth cookie)
+│   └── ui.store.ts        Zustand UI store (sidebar collapse state)
+├── lib/
+│   └── utils.ts           cn() class merge helper
+├── types/
+│   └── api.types.ts       PaginatedResponse<T>, ApiResponse<T>
+├── proxy.ts               Next.js middleware logic (route protection)
+└── index.ts               Barrel — everything re-exported from one place
+```
 
 ---
 
-## Routing (App Layer)
+## Exports reference
 
-app/
-admin/
-users/page.tsx
-logs/page.tsx
-replay/page.tsx
-notifications/page.tsx
+Import anything from `@/core` (the barrel) or directly from the sub-path.
 
-login/page.tsx
-layout.tsx
+### API
+| Export | From |
+|---|---|
+| `apiClient` | `@/core/api/apiClient` |
+| `ENDPOINTS` | `@/core/api/endpoints` |
 
-Rules:
+### Auth
+| Export | From |
+|---|---|
+| `authService` | `@/core/auth/authService` |
+| `AuthConfig` (type) | `@/core/auth/authService` |
+| `can`, `ROLES` | `@/core/auth/rbac` |
 
-* No business logic here
-* Only composition and layout
+### Stores
+| Export | From |
+|---|---|
+| `useAuthStore`, `AdminUser` | `@/store/auth.store` |
+| `useUIStore` | `@/store/ui.store` |
 
----
+### Shared Components
+All components are available via `@/shared/components/*` (resolved by tsconfig shim).
 
-## Data Fetching (TanStack Query)
-
-All server state must be handled using TanStack Query.
-
-Rules:
-
-* No direct fetch calls inside components
-* Always use hooks
-
-Example:
-
-useUsers.ts:
-
-* fetch users
-* cache results
-* handle loading and error states
+### Feature Hooks & Components
+| Export | From |
+|---|---|
+| `UserTable`, `UserDetailPanel`, `InviteUserDialog`, `useUsers`, `User` | `@/features/users/*` |
+| `RoleTable`, `RoleDetailPanel`, `CreateRoleDialog`, `useRoles`, `Role` | `@/features/roles/*` |
+| `SettingsTable`, `useSettings`, `Setting` | `@/features/settings/*` |
 
 ---
 
-## State Management (Zustand)
+## How the path aliases work
 
-Used ONLY for:
+The `portal/tsconfig.json` defines these shims so that core's internal imports continue to work regardless of where `src/core/` sits:
 
-* Auth session
-* UI state (sidebar, theme)
-
-DO NOT use for:
-
-* API data (use TanStack Query instead)
-
----
-
-## UI System
-
-All UI components should:
-
-* Use shadcn/ui primitives
-* Be reusable and composable
-* Be placed in either:
-
-  * feature components (feature-specific)
-  * shared/components (global)
+| Core file imports | tsconfig resolves it to |
+|---|---|
+| `@/config/app.config` | `src/config/app.config` — **YOUR** config |
+| `@/shared/components/button` | `src/core/shared/components/button` |
+| `@/store/auth.store` | `src/core/store/auth.store` |
+| `@/features/users/...` | `src/features/users/...` (yours) or `src/core/features/users/...` (core fallback) |
 
 ---
 
-## Authentication & Authorization
+## Pulling updates
 
-* Authentication handled via API (JWT or external provider)
-* Store session in Zustand or secure cookies
-* Protect routes using Next.js middleware
+```bash
+# fetch latest core changes
+git submodule update --remote --merge portal/src/core
 
-RBAC:
+# check what changed
+git -C portal/src/core log HEAD@{1}..HEAD --oneline
+```
 
-* Define roles (admin, support, readonly)
-* Restrict access at:
-
-  * route level
-  * component level
+If core ships a breaking change (renamed export, changed component API), you will get a TypeScript error at build time — treat it as a normal compile error and fix the affected pages/features.
 
 ---
 
-## Key Features
+## Override patterns
 
-### 1. User Management
+Never edit core. Instead:
 
-* View users
-* Edit user data
-* Manage sessions
+### Pattern 1 — Override a feature component
 
-### 2. Logs & Monitoring
+Create the same path under `src/features/`:
 
-* API request logs
-* Error tracking
-* Performance metrics
+```
+src/features/users/components/UserTable.tsx
+```
 
-### 3. Replay System
+The `@/features/*` alias in tsconfig checks `src/features/` before `src/core/features/`, so your version is used automatically.
 
-* View user sessions
-* Replay workflows
-* Debug interactions
+### Pattern 2 — Override a shared component
 
-### 4. Notifications
+The `@/shared/*` alias always points to `src/core/shared/*`, so you cannot shadow it via the same path. Instead, import your component directly in the page:
 
-* Manage SMS providers
-* Manage email providers
-* Trigger test notifications
+```tsx
+// src/app/admin/layout.tsx
+import { MyCustomSidebar } from '@/features/navigation/components/MyCustomSidebar';
+```
 
-### 5. Feature Flags
+### Pattern 3 — Extend a Zustand store
 
-* Enable/disable features
-* Control API behavior
+Stores are re-exported from `@/store/*` and you cannot shadow them. Instead, create a parallel store and compose state:
 
----
+```ts
+// src/features/profile/store/profile.store.ts
+import { useAuthStore } from '@/store/auth.store';
 
-## API Integration
+export function useProfile() {
+  const user = useAuthStore((s) => s.user);
+  // add extended profile state
+}
+```
 
-* All communication goes through API
-* No direct database access
-* Use centralized apiClient
+### Pattern 4 — Add new pages
 
----
-
-## Middleware
-
-Use Next.js middleware for:
-
-* Route protection
-* Authentication checks
-* Role validation
-
----
-
-## Best Practices
-
-* Keep components small and focused
-* Avoid global state unless necessary
-* Use hooks for logic reuse
-* Keep API layer isolated
-* Follow consistent naming
-
----
-
-## Future Improvements
-
-* Shared types between Admin + API + Flutter
-* Audit logs for admin actions
-* Real-time updates (WebSockets)
-* Advanced analytics dashboard
-
----
-
-## Goal
-
-Build a clean, scalable, and production-ready admin system that:
-
-* Integrates seamlessly with the API
-* Supports internal operations efficiently
-* Scales with future features
+Core only provides components and hooks, not pages. Pages live under `src/app/` — add freely.
