@@ -1,0 +1,38 @@
+# Production Docker Compose
+# Use: docker compose -f docker-compose.prod.yml up -d
+# Ensure backend/.env and portal/.env have strong secrets — never commit .env to git
+
+services:
+  portal:
+    build:
+      context: ./portal
+      dockerfile: Dockerfile
+      target: runtime
+    env_file: ./portal/.env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${PORTAL_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+networks:
+  app:
+    driver: bridge

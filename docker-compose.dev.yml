@@ -1,0 +1,25 @@
+services:
+
+  portal:
+    build:
+      context: ./portal
+      dockerfile: Dockerfile
+      target: dev
+    env_file: ./portal/.env
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./portal:/portal
+      - /portal/node_modules
+    ports:
+      - "${PORTAL_PORT:-4000}:4000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app
+    restart: unless-stopped
+
+networks:
+  app:
+    driver: bridge

@@ -1,4 +1,3 @@
-import { APP_CONFIG } from '@/config/app.config';
 import { ApiError } from '@/core/errors/api-error';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -7,7 +6,7 @@ type RequestOptions = RequestInit & {
 };
 
 function buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
-  const url = new URL(`${APP_CONFIG.apiBaseUrl}${path}`);
+  const url = new URL(`/api${path}`, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
