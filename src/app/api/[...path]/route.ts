@@ -1,4 +1,4 @@
-import { ApiError } from 'next/dist/server/api-utils';
+import { isApiError } from '@/core/errors/api-error';
 import type { NextRequest } from 'next/server';
 
 const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:5000/api/v1';
@@ -38,11 +38,11 @@ async function handler(
       },
     });
   } catch (error) {
-    if (error instanceof ApiError) {
+    if (isApiError(error)) {
       return new Response(
         JSON.stringify({ message: error.message }),
         {
-          status: error.statusCode,
+          status: error.status,
           headers: { 'content-type': 'application/json' },
         },
       );

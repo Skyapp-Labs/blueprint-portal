@@ -1,5 +1,6 @@
 import { ApiError } from '@/core/errors/api-error';
 import { useAuthStore } from '@/shared/store/auth.store';
+import { ENDPOINTS } from './endpoints';
 
 type RequestOptions = RequestInit & {
   params?: Record<string, string | number | boolean | undefined>;
@@ -9,9 +10,7 @@ function buildUrl(path: string, params?: Record<string, string | number | boolea
   const url = new URL(`/api${path}`, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        url.searchParams.set(key, String(value));
-      }
+      if (value !== undefined) url.searchParams.set(key, String(value));
     });
   }
   return url.toString();
@@ -42,9 +41,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     ...(init.headers as Record<string, string>),
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(buildUrl(path, params), { ...init, headers });
 
@@ -53,7 +50,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     const refreshToken = useAuthStore.getState().refreshToken;
     if (refreshToken) {
       try {
-        const refreshRes = await fetch(buildUrl('/auth/refresh'), {
+        const refreshRes = await fetch(buildUrl(ENDPOINTS.AUTH.REFRESH), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),
