@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useInviteUser } from '../hooks/useUsers';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
+import { useInviteUser } from '../mutations/users.mutations';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/shared/components/dialog';
-import { useToast } from '@/shared/components/toast';
+} from '@/shared/components/ui/dialog';
+import { useToast } from '@/shared/components/layout/toast';
 
 interface InviteUserDialogProps {
   open: boolean;

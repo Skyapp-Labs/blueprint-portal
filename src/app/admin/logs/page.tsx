@@ -1,6 +1,6 @@
 'use client';
 
-import { TopBar } from '@/shared/components/top-bar';
+import { TopBar } from '@/app/admin/_components/TopBar';
 import { Activity } from 'lucide-react';
 
 export default function LogsPage() {

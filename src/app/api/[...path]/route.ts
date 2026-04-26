@@ -1,3 +1,4 @@
+import { ApiError } from 'next/dist/server/api-utils';
 import type { NextRequest } from 'next/server';
 
 const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:5000/api/v1';
@@ -21,20 +22,63 @@ async function handler(
 
   const hasBody = !['GET', 'HEAD'].includes(request.method);
 
-  const upstream = await fetch(targetUrl.toString(), {
-    method: request.method,
-    headers: forwardedHeaders,
-    body: hasBody ? await request.text() : undefined,
-  });
+  try {
+    const upstream = await fetch(targetUrl.toString(), {
+      method: request.method,
+      headers: forwardedHeaders,
+      body: hasBody ? await request.text() : undefined,
+    });
 
-  const body = await upstream.text();
-
-  return new Response(body, {
-    status: upstream.status,
-    headers: {
-      'content-type': upstream.headers.get('content-type') ?? 'application/json',
-    },
-  });
+    const body = await upstream.text();
+  
+    return new Response(body, {
+      status: upstream.status,
+      headers: {
+        'content-type': upstream.headers.get('content-type') ?? 'application/json',
+      },
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return new Response(
+        JSON.stringify({ message: error.message }),
+        {
+          status: error.statusCode,
+          headers: { 'content-type': 'application/json' },
+        },
+      );
+    }
+  
+    const err = error as Error & { cause?: NodeJS.ErrnoException };
+    const code = err.cause?.code;
+    const isFetchNetworkFailure =
+      err instanceof TypeError &&
+      (err.message === 'fetch failed' || err.message.includes('fetch'));
+  
+    if (isFetchNetworkFailure) {
+      const isUnreachable =
+        code === 'ECONNREFUSED' ||
+        code === 'ENOTFOUND' ||
+        code === 'EAI_AGAIN' ||
+        code === 'ETIMEDOUT';
+  
+      const message = isUnreachable
+        ? 'Cannot reach the API server. Is it running, and is API_BASE_URL correct?'
+        : 'Request to the API server failed.';
+  
+      // 502 = bad gateway (proxy to upstream); 503 = service unavailable
+      return new Response(JSON.stringify({ message, code: code ?? 'UNKNOWN' }), {
+        status: 502,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  
+    return new Response(
+      JSON.stringify({
+        message: err.message ?? 'Internal server error',
+      }),
+      { status: 500, headers: { 'content-type': 'application/json' } },
+    );
+  }
 }
 
 export const GET = handler;

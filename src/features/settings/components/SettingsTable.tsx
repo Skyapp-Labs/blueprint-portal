@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSettings, useUpdateSetting } from '../hooks/useSettings';
+import { useSettings } from '../queries/settings.queries';
+import { useUpdateSetting } from '../mutations/settings.mutations';
 import type { Setting } from '../types/setting.type';
-import { Badge } from '@/shared/components/badge';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { useToast } from '@/shared/components/toast';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { useToast } from '@/shared/components/layout/toast';
 import { Pencil, Check, X, RefreshCw, Lock } from 'lucide-react';
 
 function groupSettings(settings: Setting[]): Record<string, Setting[]> {
@@ -16,7 +17,6 @@ function groupSettings(settings: Setting[]): Record<string, Setting[]> {
   }, {});
 }
 
-// Render a value in read-only mode: arrays as individual code tags, booleans as badge
 function SettingValue({ setting }: { setting: Setting }) {
   if (setting.type === 'boolean') {
     const isTrue = setting.value === 'true' || setting.value === '1';
@@ -79,7 +79,6 @@ function SettingRow({ setting }: { setting: Setting }) {
     setEditing(false);
   }
 
-  // Boolean: render inline toggle, no separate edit mode needed
   if (setting.type === 'boolean' && setting.isEditable) {
     const isTrue = setting.value === 'true' || setting.value === '1';
     return (

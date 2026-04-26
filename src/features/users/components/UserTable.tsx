@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useUsers } from '../queries/users.queries';
 import {
-  useUsers,
   useDeactivateUser,
   useActivateUser,
   useDeleteUser,
   useResendInvite,
   useRevokeInvite,
-} from '../hooks/useUsers';
+} from '../mutations/users.mutations';
 import type { User } from '../types/user.type';
-import { Badge } from '@/shared/components/badge';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
 import { ConfirmDialog } from '@/shared/components/confirm-dialog';
-import { formatDate, formatRelative, getInitials } from '@/lib/utils';
-import { useToast } from '@/shared/components/toast';
+import { formatDate, formatRelative, getInitials } from '@/shared/lib/utils';
+import { useToast } from '@/shared/components/layout/toast';
 import {
   MoreHorizontal,
   UserCheck,
@@ -35,7 +35,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '@/shared/components/dropdown-menu';
+} from '@/shared/components/ui/dropdown-menu';
 
 const statusVariant: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
   active: 'success',
@@ -91,7 +91,6 @@ export function UserTable({ onSelect }: UserTableProps) {
     return result;
   }, [allUsers, search, statusFilter]);
 
-  // Summary counts
   const activeCount = allUsers.filter((u) => u.status === 'active').length;
   const suspendedCount = allUsers.filter((u) => u.status === 'suspended').length;
   const invitedCount = allUsers.filter((u) => u.status === 'invited').length;
@@ -372,7 +371,7 @@ export function UserTable({ onSelect }: UserTableProps) {
         </table>
       </div>
 
-      {/* Pagination — always visible when data loaded */}
+      {/* Pagination */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           {filteredUsers.length < allUsers.length
@@ -404,7 +403,6 @@ export function UserTable({ onSelect }: UserTableProps) {
         )}
       </div>
 
-      {/* Confirmation dialog */}
       {confirm && (
         <ConfirmDialog
           open

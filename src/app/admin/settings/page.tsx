@@ -1,6 +1,6 @@
 'use client';
 
-import { TopBar } from '@/shared/components/top-bar';
+import { TopBar } from '@/app/admin/_components/TopBar';
 import { SettingsTable } from '@/features/settings/components/SettingsTable';
 
 export default function SettingsPage() {

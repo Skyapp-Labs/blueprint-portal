@@ -2,14 +2,15 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, Shield, Save, Edit2, Calendar, Activity } from 'lucide-react';
-import { useRole, useUpdateRole, useSetRolePermissions, useModules } from '../hooks/useRoles';
+import { useRole, useModules } from '../queries/roles.queries';
+import { useUpdateRole, useSetRolePermissions } from '../mutations/roles.mutations';
 import type { Role } from '../types/role.type';
-import { Badge } from '@/shared/components/badge';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { formatDate } from '@/lib/utils';
-import { useToast } from '@/shared/components/toast';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { formatDate } from '@/shared/lib/utils';
+import { useToast } from '@/shared/components/layout/toast';
+import { cn } from '@/shared/lib/utils';
 
 interface RoleDetailPanelProps {
   role: Role;
@@ -27,12 +28,10 @@ export function RoleDetailPanel({ role: initialRole, onClose }: RoleDetailPanelP
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: current.name, description: current.description ?? '' });
 
-  // Track selected permission IDs from the current role
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set((current.permissions ?? []).map((p) => p.id)),
   );
 
-  // Sync when the role data refreshes
   useEffect(() => {
     setSelectedIds(new Set((current.permissions ?? []).map((p) => p.id)));
     setForm({ name: current.name, description: current.description ?? '' });
@@ -186,7 +185,6 @@ export function RoleDetailPanel({ role: initialRole, onClose }: RoleDetailPanelP
 
                 return (
                   <div key={mod.id} className="rounded-md border border-border overflow-hidden">
-                    {/* Module header */}
                     <div
                       className="flex items-center justify-between px-3 py-2 bg-muted/40 cursor-pointer hover:bg-muted/60 transition-colors select-none"
                       onClick={() => toggleModule(modPermIds, allSelected)}
@@ -220,7 +218,6 @@ export function RoleDetailPanel({ role: initialRole, onClose }: RoleDetailPanelP
                       </span>
                     </div>
 
-                    {/* Permission rows */}
                     {mod.permissions.length > 0 && (
                       <div className="divide-y divide-border">
                         {mod.permissions.map((perm) => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { TopBar } from '@/shared/components/top-bar';
+import { TopBar } from '@/app/admin/_components/TopBar';
 import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 
 const providers = [
   {

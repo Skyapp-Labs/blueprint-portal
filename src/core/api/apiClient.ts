@@ -1,5 +1,5 @@
 import { ApiError } from '@/core/errors/api-error';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuthStore } from '@/shared/store/auth.store';
 
 type RequestOptions = RequestInit & {
   params?: Record<string, string | number | boolean | undefined>;

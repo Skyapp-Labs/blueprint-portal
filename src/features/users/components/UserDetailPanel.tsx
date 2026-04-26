@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { X, Mail, Phone, Shield, Clock, Calendar, Activity } from 'lucide-react';
-import { useUser, useUpdateUser } from '../hooks/useUsers';
+import { useUser } from '../queries/users.queries';
+import { useUpdateUser } from '../mutations/users.mutations';
 import type { User } from '../types/user.type';
-import { Badge } from '@/shared/components/badge';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { formatDate, formatRelative, getInitials } from '@/lib/utils';
-import { useToast } from '@/shared/components/toast';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { formatDate, formatRelative, getInitials } from '@/shared/lib/utils';
+import { useToast } from '@/shared/components/layout/toast';
 
 const statusVariant: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
   active: 'success',

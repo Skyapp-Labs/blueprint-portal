@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserPlus, Search } from 'lucide-react';
-import { TopBar } from '@/shared/components/top-bar';
-import { Button } from '@/shared/components/button';
+import { UserPlus } from 'lucide-react';
+import { TopBar } from '@/app/admin/_components/TopBar';
+import { Button } from '@/shared/components/ui/button';
 import { UserTable } from '@/features/users/components/UserTable';
 import { UserDetailPanel } from '@/features/users/components/UserDetailPanel';
 import { InviteUserDialog } from '@/features/users/components/InviteUserDialog';
@@ -17,7 +17,6 @@ export default function UsersPage() {
     <>
       <TopBar title="Users" />
       <main className="flex-1 overflow-hidden flex">
-        {/* Main content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -33,7 +32,6 @@ export default function UsersPage() {
           <UserTable onSelect={setSelectedUser} />
         </div>
 
-        {/* Detail panel */}
         {selectedUser && (
           <div className="w-96 border-l border-border bg-background overflow-y-auto shrink-0">
             <UserDetailPanel

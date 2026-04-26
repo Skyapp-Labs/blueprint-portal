@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/shared/components/dialog';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { useCreateRole } from '../hooks/useRoles';
-import { useToast } from '@/shared/components/toast';
+} from '@/shared/components/ui/dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { useCreateRole } from '../mutations/roles.mutations';
+import { useToast } from '@/shared/components/layout/toast';
 
 interface CreateRoleDialogProps {
   open: boolean;

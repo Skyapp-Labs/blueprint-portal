@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRoles, useDeleteRole } from '../hooks/useRoles';
+import { useRoles } from '../queries/roles.queries';
+import { useDeleteRole } from '../mutations/roles.mutations';
 import type { Role } from '../types/role.type';
-import { Badge } from '@/shared/components/badge';
-import { Button } from '@/shared/components/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
 import { ConfirmDialog } from '@/shared/components/confirm-dialog';
-import { formatDate } from '@/lib/utils';
-import { useToast } from '@/shared/components/toast';
+import { formatDate } from '@/shared/lib/utils';
+import { useToast } from '@/shared/components/layout/toast';
 import { MoreHorizontal, Trash2, Shield, RefreshCw } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '@/shared/components/dropdown-menu';
+} from '@/shared/components/ui/dropdown-menu';
 
 interface RoleTableProps {
   onSelect?: (role: Role) => void;

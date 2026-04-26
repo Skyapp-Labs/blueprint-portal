@@ -1,6 +1,6 @@
 'use client';
 
-import { TopBar } from '@/shared/components/top-bar';
+import { TopBar } from '@/app/admin/_components/TopBar';
 import { ToggleLeft } from 'lucide-react';
 
 const flags = [
