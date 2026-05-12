@@ -41,6 +41,12 @@ export function EmailLoginForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+      
       <div>
         <label className="text-sm font-medium mb-1.5 block">Email</label>
         <Input
@@ -73,12 +79,6 @@ export function EmailLoginForm({ onSuccess }: Props) {
           </button>
         </div>
       </div>
-
-      {error && (
-        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      )}
 
       <Button type="submit" className="w-full" loading={loading}>
         Sign in

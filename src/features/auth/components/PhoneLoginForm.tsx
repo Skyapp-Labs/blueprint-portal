@@ -96,6 +96,12 @@ export function PhoneLoginForm({ onSuccess }: Props) {
   if (step === 'phone') {
     return (
       <form onSubmit={handleSendOtp} className="space-y-4">
+        {error && (
+          <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
         <div>
           <label className="text-sm font-medium mb-1.5 block">Phone number</label>
           <div className="relative">
@@ -112,12 +118,6 @@ export function PhoneLoginForm({ onSuccess }: Props) {
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-            {error}
-          </div>
-        )}
-
         <Button type="submit" className="w-full" loading={loading}>
           Send OTP
         </Button>
@@ -127,6 +127,12 @@ export function PhoneLoginForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={handleVerifyOtp} className="space-y-4">
+      {error && (
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-1">
         <button
           type="button"
@@ -155,12 +161,6 @@ export function PhoneLoginForm({ onSuccess }: Props) {
           autoFocus
         />
       </div>
-
-      {error && (
-        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      )}
 
       <Button type="submit" className="w-full" loading={loading}>
         Verify &amp; Sign in
